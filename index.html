@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1030">
+  <title>CardVal – בודק קלפים</title>
+  <meta name="description" content="צלם את שני צדי הקלף וקבל הערכה אם הוא מקורי או מזויף.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <button class="icon-btn" id="btn-home" aria-label="חזרה להתחלה" hidden>
+      <svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="brand">
+      <span class="brand-mark">✦</span>
+      <span>CardVal</span>
+    </div>
+    <span class="topbar-spacer"></span>
+  </header>
+
+  <main>
+    <!-- 1. Choose card type -->
+    <section class="screen active" id="screen-select">
+      <h1 class="hero-title">האם הקלף שלך <span class="glow">מקורי?</span></h1>
+      <p class="hero-sub">בחר סוג קלף, צלם את שני הצדדים, ואנחנו ננתח צבעים, מסגרות, חדות הדפסה ועוד.</p>
+      <div class="type-grid" id="type-grid"></div>
+    </section>
+
+    <!-- 2. Scan both sides -->
+    <section class="screen" id="screen-scan">
+      <div class="sides" id="sides"></div>
+      <p class="step-label" id="step-label"></p>
+
+      <div class="viewport" id="viewport">
+        <video id="video" playsinline muted autoplay></video>
+        <img id="frozen" alt="" hidden>
+        <div class="guide" id="guide"><span></span><span></span><span></span><span></span></div>
+        <canvas id="fx"></canvas>
+        <div class="cam-msg" id="cam-msg" hidden></div>
+        <div class="toast" id="toast" hidden>
+          <p id="toast-text"></p>
+          <div class="toast-actions">
+            <button class="btn small" id="toast-retry">צלם שוב</button>
+            <button class="btn small ghost" id="toast-continue" hidden>המשך בכל זאת</button>
+          </div>
+        </div>
+      </div>
+      <p class="hint" id="hint"></p>
+
+      <div class="controls">
+        <label class="ctrl-side" title="העלאת תמונה">
+          <input type="file" accept="image/*" id="file-input" hidden>
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 16l4.5-5 3.5 4 2.5-3L20 17M4 5h16v14H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>גלריה</span>
+        </label>
+        <button class="shutter" id="btn-capture" aria-label="צלם"><span></span></button>
+        <button class="ctrl-side" id="btn-flip" title="החלף מצלמה">
+          <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 8h3l2-2h6l2 2h3v11H4zM9 13a3 3 0 0 0 5 2M15 13a3 3 0 0 0-5-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>מצלמה</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. Thinking -->
+    <section class="screen" id="screen-thinking">
+      <div class="think-card">
+        <div class="think-orb"></div>
+        <canvas id="think-fx"></canvas>
+      </div>
+      <h2 class="think-title">מנתח את הקלף…</h2>
+      <ul class="think-steps" id="think-steps"></ul>
+    </section>
+
+    <!-- 4. Result -->
+    <section class="screen" id="screen-result">
+      <div class="verdict" id="verdict">
+        <div class="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" class="gauge-bg"/>
+            <circle cx="60" cy="60" r="52" class="gauge-fg" id="gauge-fg"/>
+          </svg>
+          <div class="gauge-num"><b id="gauge-num">0</b><small>%</small></div>
+        </div>
+        <div class="verdict-text">
+          <h2 id="verdict-title"></h2>
+          <p id="verdict-sub"></p>
+          <p class="confidence" id="confidence"></p>
+        </div>
+      </div>
+
+      <div class="photos" id="photos"></div>
+
+      <div class="panel">
+        <h3>פרטים על הקלף</h3>
+        <dl class="facts" id="facts"></dl>
+      </div>
+
+      <div class="panel">
+        <h3>בדיקות אוטומטיות מהצילום</h3>
+        <ul class="checks" id="checks"></ul>
+      </div>
+
+      <div class="panel">
+        <h3>שפר את הדיוק – בדיקות ידניות</h3>
+        <p class="muted">יש דברים שמצלמה לא יכולה לבדוק. כל תשובה מעדכנת את הציון למעלה. מבחן האור והשכבה הכהה הם הבדיקות החזקות ביותר.</p>
+        <ul class="manual" id="manual"></ul>
+      </div>
+
+      <div class="panel muted small">
+        <p><b>חשוב:</b> הניתוח מבוסס על תמונה מהטלפון ומשמש הערכה בלבד – הוא לא מחליף בדיקה של מומחה או חברת דירוג (PSA / CGC / Beckett). תאורה, זווית ומצלמה משפיעות על התוצאה.</p>
+        <p>מקורות:</p>
+        <ul class="sources" id="sources"></ul>
+      </div>
+
+      <button class="btn big" id="btn-again">בדוק קלף נוסף</button>
+    </section>
+  </main>
+
+  <script src="js/imaging.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/cards/pokemon.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
